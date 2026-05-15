@@ -1,10 +1,10 @@
 import { POPULAR } from './popular.js';
+import {
+  loadCatalogs, buildIndex, keyOf,
+  buildCommand, buildScript, splitSelection,
+  showNextSteps, escapeHtml, buildIcon,
+} from './shared.js';
 
-const CASK_URL = 'https://formulae.brew.sh/api/cask.json';
-const FORMULA_URL = 'https://formulae.brew.sh/api/formula.json';
-const CACHE_KEY = 'macnite:catalog:v2';
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-const TOKEN_RE = /^[a-z0-9][a-z0-9._+-]*$/i;
 const MAX_RESULTS = 100;
 
 const state = {
@@ -26,66 +26,6 @@ const reportForm = $('#report-form');
 const reportMessage = $('#report-message');
 const reportSubmit = $('#report-submit');
 const reportStatus = $('#report-status');
-const nextDialog = $('#next-steps');
-const nextTitle = $('#next-title');
-const nextBody = $('#next-body');
-const nextClose = $('#next-close');
-
-const keyOf = (kind, token) => `${kind}:${token}`;
-
-async function loadCatalogs() {
-  const cached = readCache();
-  if (cached) return cached;
-  const [casksRaw, formulaeRaw] = await Promise.all([
-    fetch(CASK_URL).then(checkOk).then(r => r.json()),
-    fetch(FORMULA_URL).then(checkOk).then(r => r.json()),
-  ]);
-  const casks = casksRaw.map(c => ({
-    kind: 'cask',
-    token: c.token,
-    name: Array.isArray(c.name) ? c.name[0] : c.token,
-    desc: c.desc || '',
-    homepage: c.homepage || '',
-  }));
-  const formulae = formulaeRaw.map(f => ({
-    kind: 'formula',
-    token: f.name,
-    name: f.name,
-    desc: f.desc || '',
-    homepage: f.homepage || '',
-  }));
-  const data = { casks, formulae, savedAt: Date.now() };
-  writeCache(data);
-  return data;
-}
-
-function checkOk(res) {
-  if (!res.ok) throw new Error(`Catalog fetch failed: ${res.status} ${res.statusText} (${res.url})`);
-  return res;
-}
-
-function readCache() {
-  try {
-    const raw = localStorage.getItem(CACHE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!parsed?.savedAt || Date.now() - parsed.savedAt > CACHE_TTL_MS) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function writeCache(data) {
-  try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); }
-  catch { /* localStorage may be full or disabled; ignore */ }
-}
-
-function buildIndex({ casks, formulae }) {
-  state.index = [...casks, ...formulae];
-  state.byKey.clear();
-  for (const e of state.index) state.byKey.set(keyOf(e.kind, e.token), e);
-}
 
 function renderPopular() {
   popularGrid.removeAttribute('aria-busy');
@@ -125,41 +65,6 @@ function buildTile(entry) {
   return label;
 }
 
-function buildIcon(entry) {
-  const wrap = document.createElement('div');
-  wrap.className = 'icon';
-  const url = faviconUrl(entry.homepage);
-  if (url) {
-    const img = document.createElement('img');
-    img.src = url;
-    img.alt = '';
-    img.loading = 'lazy';
-    img.decoding = 'async';
-    img.referrerPolicy = 'no-referrer';
-    img.addEventListener('error', () => {
-      img.remove();
-      wrap.textContent = (entry.name || entry.token).charAt(0).toUpperCase();
-      wrap.classList.add('icon-fallback');
-    }, { once: true });
-    wrap.appendChild(img);
-  } else {
-    wrap.textContent = (entry.name || entry.token).charAt(0).toUpperCase();
-    wrap.classList.add('icon-fallback');
-  }
-  return wrap;
-}
-
-function faviconUrl(homepage) {
-  if (!homepage) return null;
-  try {
-    const host = new URL(homepage).hostname;
-    if (!host) return null;
-    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(host)}&sz=64`;
-  } catch {
-    return null;
-  }
-}
-
 function toggle(key, checked, tileEl) {
   if (checked) state.selected.add(key);
   else state.selected.delete(key);
@@ -179,12 +84,6 @@ function syncMirroredCheckboxes(key, checked) {
 
 function cssEscape(s) {
   return (window.CSS && CSS.escape) ? CSS.escape(s) : s.replace(/["\\]/g, '\\$&');
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[c]));
 }
 
 function debounce(fn, ms) {
@@ -236,93 +135,8 @@ function updateSelectionBar() {
   clearBtn.disabled = disabled;
 }
 
-function selectionByKind() {
-  const casks = [];
-  const formulae = [];
-  for (const key of state.selected) {
-    const [kind, token] = splitKey(key);
-    if (!TOKEN_RE.test(token)) continue; // defensive: never emit weird tokens into shell
-    if (kind === 'cask') casks.push(token);
-    else if (kind === 'formula') formulae.push(token);
-  }
-  casks.sort(); formulae.sort();
-  return { casks, formulae };
-}
-
-function splitKey(key) {
-  const i = key.indexOf(':');
-  return [key.slice(0, i), key.slice(i + 1)];
-}
-
-const BREW_INSTALL_URL = 'https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh';
-// After a fresh Homebrew install, `brew` isn't on PATH in the current shell —
-// especially on Apple Silicon (/opt/homebrew/bin). Eval shellenv so the install
-// step below can actually find `brew`.
-const BREW_SHELLENV_EVAL = 'eval "$(/opt/homebrew/bin/brew shellenv 2>/dev/null || /usr/local/bin/brew shellenv)"';
-const MACNITE_BANNER_URL = 'https://macnite.seanblowers.app/banner.txt';
-// Brace-grouped so `|| true` only catches a curl failure, not the brew
-// install that runs before it in the one-liner chain.
-const MACNITE_BANNER_CMD = `{ curl -fsSL ${MACNITE_BANNER_URL} 2>/dev/null || true; }`;
-
-// Install each app one at a time so a single failure (e.g. an app already at
-// /Applications/ that wasn't installed via brew) doesn't abort the rest. Failed
-// tokens accumulate in $macnite_fails and are reported at the end.
-const FAILURE_REPORT = 'if [ -n "$macnite_fails" ]; then echo; echo "Could not install:$macnite_fails"; echo "(They may already be installed manually — move them to the Trash, then re-run.)"; fi';
-
-function buildCommand() {
-  const { casks, formulae } = selectionByKind();
-  const parts = [
-    `command -v brew >/dev/null 2>&1 || /bin/bash -c "$(curl -fsSL ${BREW_INSTALL_URL})"`,
-    BREW_SHELLENV_EVAL,
-    'macnite_fails=""',
-  ];
-  if (casks.length) {
-    parts.push(`for c in ${casks.join(' ')}; do brew install --cask "$c" || macnite_fails="$macnite_fails $c"; done`);
-  }
-  if (formulae.length) {
-    parts.push(`for f in ${formulae.join(' ')}; do brew install "$f" || macnite_fails="$macnite_fails $f"; done`);
-  }
-  parts.push(FAILURE_REPORT);
-  parts.push(MACNITE_BANNER_CMD);
-  return parts.join(' && ');
-}
-
-function buildScript() {
-  const { casks, formulae } = selectionByKind();
-  const lines = [
-    '#!/usr/bin/env bash',
-    '# Generated by Macnite — https://macnite.seanblowers.app',
-    'set -euo pipefail',
-    '',
-    'if ! command -v brew >/dev/null 2>&1; then',
-    '  echo "Installing Homebrew…"',
-    `  /bin/bash -c "$(curl -fsSL ${BREW_INSTALL_URL})"`,
-    'fi',
-    '',
-    '# Make sure brew is on PATH for this shell (Apple Silicon vs. Intel).',
-    'if   [ -x /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)"',
-    'elif [ -x /usr/local/bin/brew ];   then eval "$(/usr/local/bin/brew shellenv)"',
-    'fi',
-    '',
-    'macnite_fails=""',
-    '',
-  ];
-  if (casks.length) {
-    lines.push(`for c in ${casks.join(' ')}; do`);
-    lines.push('  brew install --cask "$c" || macnite_fails="$macnite_fails $c"');
-    lines.push('done', '');
-  }
-  if (formulae.length) {
-    lines.push(`for f in ${formulae.join(' ')}; do`);
-    lines.push('  brew install "$f" || macnite_fails="$macnite_fails $f"');
-    lines.push('done', '');
-  }
-  lines.push(FAILURE_REPORT, '', MACNITE_BANNER_CMD, '');
-  return lines.join('\n');
-}
-
 async function copyCommand() {
-  const cmd = buildCommand();
+  const cmd = buildCommand(splitSelection(state.selected));
   try {
     await navigator.clipboard.writeText(cmd);
   } catch {
@@ -338,7 +152,7 @@ async function copyCommand() {
 }
 
 function downloadScript() {
-  const text = buildScript();
+  const text = buildScript(splitSelection(state.selected));
   const blob = new Blob([text], { type: 'text/x-shellscript' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -349,64 +163,6 @@ function downloadScript() {
   a.remove();
   URL.revokeObjectURL(url);
   showNextSteps('downloaded');
-}
-
-function showNextSteps(mode, cmd) {
-  nextBody.innerHTML = '';
-  let title, steps, snippet;
-  if (mode === 'copied') {
-    title = 'Copied! Here\'s what to do next';
-    steps = [
-      'Open <strong>Terminal</strong>: press <kbd>⌘</kbd>+<kbd>Space</kbd>, type <em>Terminal</em>, press Enter.',
-      'Click anywhere in the Terminal window, paste with <kbd>⌘</kbd>+<kbd>V</kbd>, and press Enter.',
-      'If you\'re asked for your Mac password, type it and press Enter. You won\'t see the letters as you type — that\'s normal.',
-      'Leave Terminal running. When you see your name and a <code>%</code> prompt again, everything is installed.',
-    ];
-    snippet = cmd;
-  } else {
-    title = 'Downloaded! Here\'s how to run it';
-    steps = [
-      'Open <strong>Terminal</strong>: press <kbd>⌘</kbd>+<kbd>Space</kbd>, type <em>Terminal</em>, press Enter.',
-      'Copy the command below, paste it in Terminal (<kbd>⌘</kbd>+<kbd>V</kbd>), and press Enter.',
-      'If you\'re asked for your Mac password, type it and press Enter. You won\'t see the letters as you type — that\'s normal.',
-      'When you see your name and a <code>%</code> prompt again, everything is installed.',
-    ];
-    // Picks the most recently downloaded macnite-install*.sh in ~/Downloads,
-    // so it works whether Safari named the file macnite-install.sh,
-    // macnite-install-2.sh, etc.
-    snippet = 'bash "$(ls -t ~/Downloads/macnite-install*.sh | head -n1)"';
-  }
-  nextTitle.textContent = title;
-  for (const html of steps) {
-    const li = document.createElement('li');
-    li.innerHTML = html;
-    nextBody.appendChild(li);
-  }
-  if (snippet) {
-    const wrap = document.createElement('div');
-    wrap.className = 'cmd-wrap';
-    const pre = document.createElement('pre');
-    pre.className = 'cmd-preview';
-    pre.textContent = snippet;
-    const copyAgain = document.createElement('button');
-    copyAgain.type = 'button';
-    copyAgain.className = 'cmd-copy ghost';
-    copyAgain.textContent = 'Copy';
-    copyAgain.addEventListener('click', async () => {
-      try { await navigator.clipboard.writeText(snippet); copyAgain.textContent = 'Copied'; }
-      catch { copyAgain.textContent = 'Copy failed'; }
-      setTimeout(() => { copyAgain.textContent = 'Copy'; }, 1500);
-    });
-    wrap.append(pre, copyAgain);
-    nextBody.appendChild(wrap);
-  }
-  if (typeof nextDialog.showModal === 'function') nextDialog.showModal();
-  else nextDialog.setAttribute('open', '');
-}
-
-function closeNextSteps() {
-  if (typeof nextDialog.close === 'function') nextDialog.close();
-  else nextDialog.removeAttribute('open');
 }
 
 function clearSelection() {
@@ -469,12 +225,13 @@ copyBtn.addEventListener('click', copyCommand);
 downloadBtn.addEventListener('click', downloadScript);
 clearBtn.addEventListener('click', clearSelection);
 reportForm.addEventListener('submit', submitReport);
-nextClose.addEventListener('click', closeNextSteps);
 
 (async function init() {
   try {
     const data = await loadCatalogs();
-    buildIndex(data);
+    const { index, byKey } = buildIndex(data);
+    state.index = index;
+    state.byKey = byKey;
     renderPopular();
     updateSelectionBar();
   } catch (err) {

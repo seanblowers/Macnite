@@ -29,3 +29,18 @@
   for = "/banner.txt"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/presets.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/presets.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/shared.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

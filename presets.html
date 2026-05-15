@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Macnite Presets — curated app bundles for Mac</title>
+  <meta name="description" content="Pre-made app bundles for new Macs, developers, creatives, and students. One click, one command." />
+  <link rel="icon" type="image/svg+xml" href="logo.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <a href="/" class="back-link">← Back to picker</a>
+    <img class="logo" src="wordmark.svg" alt="Macnite" width="280" height="70" />
+    <h1 class="visually-hidden">Macnite Presets</h1>
+    <p class="tagline">Pick a preset. Get one command.</p>
+    <p class="lede">
+      Curated app bundles for common setups. Each preset has its own one-command
+      install — no ticking, no picking, just copy and paste.
+    </p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Presets</h2>
+      <div id="presets-grid" class="presets-grid" aria-busy="true">
+        <p class="loading">Loading presets…</p>
+      </div>
+    </section>
+
+    <dialog id="next-steps" class="next-steps">
+      <h3 id="next-title">Now do this</h3>
+      <ol id="next-body"></ol>
+      <button type="button" id="next-close">Got it</button>
+    </dialog>
+
+    <footer class="site-footer">
+      <p>
+        Made by <a href="https://seanblowers.me/2026/05/14/macnite-a-ninite-for-mac-built-in-a-static-html-file/" target="_blank" rel="noopener">Sean Blowers</a>.
+        Open source on <a href="https://github.com/seanblowers/Macnite" target="_blank" rel="noopener">GitHub</a>.
+      </p>
+    </footer>
+  </main>
+
+  <script type="module" src="presets.js?v=1"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>
