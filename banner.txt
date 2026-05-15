@@ -6,8 +6,6 @@
   ██║ ╚═╝ ██║ ██║  ██║ ╚██████╗ ██║ ╚████║ ██║    ██║    ███████╗
   ╚═╝     ╚═╝ ╚═╝  ╚═╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═╝    ╚═╝    ╚══════╝
 
-  All done — your apps are installed.
-
   If Macnite saved you some clicking, consider supporting the
   projects that made it possible:
 

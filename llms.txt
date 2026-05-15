@@ -1,0 +1,30 @@
+# Macnite
+
+> Macnite is a Ninite-style installer for macOS. Users tick apps in a web UI, then either copy a single `brew` command or download a shell script that installs Homebrew (if missing) and their selected apps in one go. Pure static site — no backend, no accounts, no tracking.
+
+## What it does
+
+- Lets visitors pick from ~14,000 apps and CLI tools from the [Homebrew](https://brew.sh) catalog (casks + formulae).
+- Builds a one-liner that installs Homebrew if missing, then loops through `brew install --cask` / `brew install` for the chosen apps, with per-app failure tolerance so one bad install doesn't abort the run.
+- Reports a "All done — N apps installed in Xm Ys. You saved ~K clicks." summary at the end, followed by an ASCII banner.
+
+## Pages
+
+- `/` — main picker. Curated "Popular apps" tiles plus full-catalog search. Selected apps generate a copy-paste command or a downloadable `.sh` script.
+- `/presets.html` — curated bundles (New Mac essentials, Developer, Designer & Creative, Student & Office, Communication, Gaming, Content creator, Power user, AI assistants). Each preset has its own Copy command / Download script buttons. Includes a "Suggest a preset" form for user-generated bundles.
+
+## Share links
+
+Selections encode into a hash URL: `https://macnite.app/#share=cask:raycast,cask:1password,formula:git`. Visiting that URL pre-ticks those apps in the picker.
+
+## Source
+
+- Live site: https://macnite.app
+- Repository: https://github.com/seanblowers/Macnite
+- Author: Sean Blowers — write-up at https://seanblowers.me/2026/05/14/macnite-a-ninite-for-mac-built-in-a-static-html-file/
+
+## Tech
+
+- Pure static HTML/CSS/JS, no build step. ES modules: `app.js`, `presets.js`, `shared.js`.
+- Catalog source: `https://formulae.brew.sh/api/cask.json` and `/api/formula.json`, cached 24h in localStorage.
+- Hosted on Netlify. Netlify Forms handles error reports (`macnite-errors`) and preset suggestions (`macnite-preset-suggestion`).

@@ -2,6 +2,7 @@ import { POPULAR } from './popular.js';
 import {
   loadCatalogs, buildIndex, keyOf,
   buildCommand, buildScript, splitSelection,
+  buildShareUrl, parseShareHash,
   showNextSteps, escapeHtml, buildIcon,
 } from './shared.js';
 
@@ -22,6 +23,7 @@ const countEl = $('#count');
 const copyBtn = $('#copy');
 const downloadBtn = $('#download');
 const clearBtn = $('#clear');
+const shareBtn = $('#share');
 const reportForm = $('#report-form');
 const reportMessage = $('#report-message');
 const reportSubmit = $('#report-submit');
@@ -31,8 +33,20 @@ function renderPopular() {
   popularGrid.removeAttribute('aria-busy');
   popularGrid.innerHTML = '';
   const frag = document.createDocumentFragment();
+  const seen = new Set();
   for (const { kind, token } of POPULAR) {
-    const entry = state.byKey.get(keyOf(kind, token));
+    const key = keyOf(kind, token);
+    const entry = state.byKey.get(key);
+    if (!entry) continue;
+    seen.add(key);
+    frag.appendChild(buildTile(entry));
+  }
+  // Surface selected items that weren't in the curated list — happens when
+  // someone arrives via a share link whose tokens aren't in popular.js. Without
+  // this they'd be in the count but invisible on the page.
+  for (const key of state.selected) {
+    if (seen.has(key)) continue;
+    const entry = state.byKey.get(key);
     if (!entry) continue;
     frag.appendChild(buildTile(entry));
   }
@@ -133,6 +147,25 @@ function updateSelectionBar() {
   copyBtn.disabled = disabled;
   downloadBtn.disabled = disabled;
   clearBtn.disabled = disabled;
+  shareBtn.disabled = disabled;
+}
+
+async function shareLink() {
+  const url = buildShareUrl(splitSelection(state.selected));
+  if (!url) return;
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+  }
+  const original = shareBtn.textContent;
+  shareBtn.textContent = 'Link copied!';
+  setTimeout(() => { shareBtn.textContent = original; }, 1500);
 }
 
 async function copyCommand() {
@@ -224,7 +257,15 @@ searchInput.addEventListener('input', (e) => renderSearch(e.target.value));
 copyBtn.addEventListener('click', copyCommand);
 downloadBtn.addEventListener('click', downloadScript);
 clearBtn.addEventListener('click', clearSelection);
+shareBtn.addEventListener('click', shareLink);
 reportForm.addEventListener('submit', submitReport);
+
+function applyShareHash() {
+  for (const { kind, token } of parseShareHash(location.hash)) {
+    const key = keyOf(kind, token);
+    if (state.byKey.has(key)) state.selected.add(key);
+  }
+}
 
 (async function init() {
   try {
@@ -232,6 +273,7 @@ reportForm.addEventListener('submit', submitReport);
     const { index, byKey } = buildIndex(data);
     state.index = index;
     state.byKey = byKey;
+    applyShareHash();
     renderPopular();
     updateSelectionBar();
   } catch (err) {

@@ -116,6 +116,7 @@
   <footer class="selection-bar" aria-live="polite">
     <span id="count">0 selected</span>
     <button type="button" id="clear" class="ghost" disabled>Clear</button>
+    <button type="button" id="share" class="ghost" disabled>Share link</button>
     <button type="button" id="copy" disabled>Copy command</button>
     <button type="button" id="download" disabled>Download script</button>
   </footer>
@@ -129,7 +130,7 @@
     <input name="bot-field" />
   </form>
 
-  <script type="module" src="app.js?v=5"></script>
+  <script type="module" src="app.js?v=6"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(() => {});

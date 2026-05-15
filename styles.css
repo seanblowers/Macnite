@@ -285,6 +285,7 @@ kbd {
 }
 .report h2 { margin-top: 0; color: var(--text); text-transform: none; letter-spacing: 0; font-size: 1.1rem; }
 .report-help { color: var(--muted); margin: 0 0 14px; font-size: 0.95rem; }
+.report-form input,
 .report-form textarea {
   width: 100%;
   background: var(--bg);
@@ -293,10 +294,20 @@ kbd {
   color: var(--text);
   padding: 12px;
   font: inherit;
-  resize: vertical;
   outline: none;
 }
+.report-form textarea { resize: vertical; }
+.report-form input:focus,
 .report-form textarea:focus { border-color: var(--accent); }
+.report-form label {
+  display: block;
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.report-form label > input,
+.report-form label > textarea { margin-top: 6px; color: var(--text); }
+.report-form .optional { color: var(--muted); font-weight: 400; }
 .report-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
 .report-status { font-size: 0.9rem; color: var(--muted); }
 .report-status.ok  { color: var(--ok); }

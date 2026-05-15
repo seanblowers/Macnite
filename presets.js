@@ -62,6 +62,69 @@ const PRESETS = [
       { kind: 'cask', token: 'google-drive' },
     ],
   },
+  {
+    id: 'communication',
+    name: 'Communication',
+    desc: 'Chat, calls, and meetings — covers most teams.',
+    apps: [
+      { kind: 'cask', token: 'zoom' },
+      { kind: 'cask', token: 'slack' },
+      { kind: 'cask', token: 'discord' },
+      { kind: 'cask', token: 'microsoft-teams' },
+      { kind: 'cask', token: 'whatsapp' },
+      { kind: 'cask', token: 'signal' },
+      { kind: 'cask', token: 'telegram' },
+    ],
+  },
+  {
+    id: 'gaming',
+    name: 'Gaming',
+    desc: 'Stores, voice, and capture for playing on a Mac.',
+    apps: [
+      { kind: 'cask', token: 'steam' },
+      { kind: 'cask', token: 'epic-games' },
+      { kind: 'cask', token: 'discord' },
+      { kind: 'cask', token: 'obs' },
+    ],
+  },
+  {
+    id: 'creator',
+    name: 'Content creator',
+    desc: 'Stream, record, edit, and ship video and audio.',
+    apps: [
+      { kind: 'cask', token: 'obs' },
+      { kind: 'cask', token: 'audacity' },
+      { kind: 'cask', token: 'handbrake' },
+      { kind: 'cask', token: 'davinci-resolve' },
+      { kind: 'cask', token: 'krita' },
+      { kind: 'cask', token: 'iina' },
+    ],
+  },
+  {
+    id: 'power-user',
+    name: 'Power user',
+    desc: 'Quality-of-life utilities that supercharge macOS.',
+    apps: [
+      { kind: 'cask', token: 'raycast' },
+      { kind: 'cask', token: 'rectangle' },
+      { kind: 'cask', token: 'alt-tab' },
+      { kind: 'cask', token: 'karabiner-elements' },
+      { kind: 'cask', token: 'stats' },
+      { kind: 'cask', token: 'hiddenbar' },
+      { kind: 'cask', token: 'the-unarchiver' },
+    ],
+  },
+  {
+    id: 'ai',
+    name: 'AI assistants',
+    desc: 'Chat clients and local model runners.',
+    apps: [
+      { kind: 'cask', token: 'chatgpt' },
+      { kind: 'cask', token: 'claude' },
+      { kind: 'cask', token: 'ollama' },
+      { kind: 'cask', token: 'lm-studio' },
+    ],
+  },
 ];
 
 const presetsGrid = document.querySelector('#presets-grid');
@@ -166,6 +229,67 @@ function renderPresets(byKey) {
   }
   presetsGrid.appendChild(frag);
 }
+
+// ---- Suggest-a-preset form (Netlify Forms) ----
+
+const suggestForm = document.querySelector('#suggest-form');
+const suggestName = document.querySelector('#suggest-name');
+const suggestLink = document.querySelector('#suggest-link');
+const suggestWhy = document.querySelector('#suggest-why');
+const suggestSubmit = document.querySelector('#suggest-submit');
+const suggestStatus = document.querySelector('#suggest-status');
+
+function setSuggestStatus(text, kind) {
+  suggestStatus.textContent = text;
+  suggestStatus.classList.remove('ok', 'err');
+  if (kind) suggestStatus.classList.add(kind);
+}
+
+async function submitSuggestion(e) {
+  e.preventDefault();
+  const preset_name = suggestName.value.trim();
+  const share_link = suggestLink.value.trim();
+  const why = suggestWhy.value.trim();
+  if (!preset_name) {
+    setSuggestStatus('Give the preset a name.', 'err');
+    suggestName.focus();
+    return;
+  }
+  if (!share_link || !/#share=/.test(share_link)) {
+    setSuggestStatus("That doesn't look like a share link — it should contain '#share='.", 'err');
+    suggestLink.focus();
+    return;
+  }
+  suggestSubmit.disabled = true;
+  const originalLabel = suggestSubmit.textContent;
+  suggestSubmit.textContent = 'Sending…';
+  setSuggestStatus('', '');
+  try {
+    const body = new URLSearchParams({
+      'form-name': 'macnite-preset-suggestion',
+      preset_name,
+      share_link,
+      why,
+      user_agent: navigator.userAgent,
+      'bot-field': '',
+    });
+    const res = await fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
+    });
+    if (!res.ok) throw new Error(`Form POST failed: ${res.status}`);
+    suggestForm.reset();
+    setSuggestStatus('Thanks — we\'ll take a look.', 'ok');
+  } catch (err) {
+    setSuggestStatus(`Couldn't send: ${err.message}`, 'err');
+  } finally {
+    suggestSubmit.disabled = false;
+    suggestSubmit.textContent = originalLabel;
+  }
+}
+
+suggestForm.addEventListener('submit', submitSuggestion);
 
 (async function init() {
   // Render once with fallback names immediately so users see something fast.
