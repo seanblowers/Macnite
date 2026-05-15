@@ -264,14 +264,25 @@ const MACNITE_BANNER_URL = 'https://macnite.seanblowers.app/banner.txt';
 // install that runs before it in the one-liner chain.
 const MACNITE_BANNER_CMD = `{ curl -fsSL ${MACNITE_BANNER_URL} 2>/dev/null || true; }`;
 
+// Install each app one at a time so a single failure (e.g. an app already at
+// /Applications/ that wasn't installed via brew) doesn't abort the rest. Failed
+// tokens accumulate in $macnite_fails and are reported at the end.
+const FAILURE_REPORT = 'if [ -n "$macnite_fails" ]; then echo; echo "Could not install:$macnite_fails"; echo "(They may already be installed manually — move them to the Trash, then re-run.)"; fi';
+
 function buildCommand() {
   const { casks, formulae } = selectionByKind();
   const parts = [
     `command -v brew >/dev/null 2>&1 || /bin/bash -c "$(curl -fsSL ${BREW_INSTALL_URL})"`,
     BREW_SHELLENV_EVAL,
+    'macnite_fails=""',
   ];
-  if (casks.length)    parts.push(`brew install --cask ${casks.join(' ')}`);
-  if (formulae.length) parts.push(`brew install ${formulae.join(' ')}`);
+  if (casks.length) {
+    parts.push(`for c in ${casks.join(' ')}; do brew install --cask "$c" || macnite_fails="$macnite_fails $c"; done`);
+  }
+  if (formulae.length) {
+    parts.push(`for f in ${formulae.join(' ')}; do brew install "$f" || macnite_fails="$macnite_fails $f"; done`);
+  }
+  parts.push(FAILURE_REPORT);
   parts.push(MACNITE_BANNER_CMD);
   return parts.join(' && ');
 }
@@ -293,10 +304,20 @@ function buildScript() {
     'elif [ -x /usr/local/bin/brew ];   then eval "$(/usr/local/bin/brew shellenv)"',
     'fi',
     '',
+    'macnite_fails=""',
+    '',
   ];
-  if (casks.length)    lines.push(`brew install --cask ${casks.join(' ')}`);
-  if (formulae.length) lines.push(`brew install ${formulae.join(' ')}`);
-  lines.push('', MACNITE_BANNER_CMD, '');
+  if (casks.length) {
+    lines.push(`for c in ${casks.join(' ')}; do`);
+    lines.push('  brew install --cask "$c" || macnite_fails="$macnite_fails $c"');
+    lines.push('done', '');
+  }
+  if (formulae.length) {
+    lines.push(`for f in ${formulae.join(' ')}; do`);
+    lines.push('  brew install "$f" || macnite_fails="$macnite_fails $f"');
+    lines.push('done', '');
+  }
+  lines.push(FAILURE_REPORT, '', MACNITE_BANNER_CMD, '');
   return lines.join('\n');
 }
 
