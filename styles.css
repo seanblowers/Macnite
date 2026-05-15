@@ -33,14 +33,17 @@ a { color: var(--accent); }
   text-align: center;
   border-bottom: 1px solid var(--border);
 }
-.hero h1 {
-  margin: 0;
-  font-size: clamp(40px, 7vw, 64px);
-  letter-spacing: -0.02em;
-  background: linear-gradient(135deg, #ff9f1c, #ff5e7e);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.hero .logo {
+  display: block;
+  margin: 0 auto;
+  width: clamp(220px, 36vw, 320px);
+  height: auto;
+}
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
 }
 .tagline { font-size: 1.35rem; margin: 12px 0 0; font-weight: 600; }
 .lede {

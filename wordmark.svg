@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" role="img" aria-label="Macnite">
+  <defs>
+    <linearGradient id="mw-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff9f1c"/>
+      <stop offset="100%" stop-color="#ff5e7e"/>
+    </linearGradient>
+    <linearGradient id="mw-text" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff9f1c"/>
+      <stop offset="100%" stop-color="#ff5e7e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Mark -->
+  <g transform="translate(8,8)">
+    <rect x="0" y="0" width="64" height="64" rx="14" ry="14" fill="url(#mw-bg)"/>
+    <path d="M10 46 V10 H18 L28 26 L38 10 H46 V46 H38 V22 L28 38 L18 22 V46 Z"
+          transform="translate(0,4)" fill="#ffffff"/>
+    <g opacity="0.85" transform="translate(0,4)">
+      <circle cx="49" cy="45" r="7" fill="#ffffff"/>
+      <path d="M49 41 V47 M45.8 44.2 L49 47.4 L52.2 44.2"
+            stroke="#ff5e7e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </g>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="92" y="56"
+        font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif"
+        font-size="44"
+        font-weight="700"
+        letter-spacing="-1.5"
+        fill="url(#mw-text)">Macnite</text>
+</svg>
