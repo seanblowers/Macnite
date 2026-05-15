@@ -4,6 +4,7 @@ export const POPULAR = [
   // Browsers
   { kind: 'cask', token: 'google-chrome' },
   { kind: 'cask', token: 'firefox' },
+  { kind: 'cask', token: 'setapp' },
   { kind: 'cask', token: 'brave-browser' },
   { kind: 'cask', token: 'arc' },
 
