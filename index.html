@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Macnite — pick your Mac apps. Get one command.</title>
+  <meta name="description" content="A Ninite-style installer for macOS. Tick apps, copy a brew command or download a one-shot install script." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <h1>Macnite</h1>
+    <p class="tagline">Install your favorite Mac apps in one go.</p>
+    <p class="lede">
+      Tick the apps you want. We'll build a single command that installs them
+      all — no setup wizards, no clicking through installers, no signups.
+    </p>
+    <p class="subtle">Free. Open source. No accounts. No tracking.</p>
+  </header>
+
+  <main>
+    <section class="how">
+      <h2>How it works</h2>
+      <ol class="steps">
+        <li>
+          <span class="step-num">1</span>
+          <div>
+            <strong>Tick the apps you want</strong>
+            <p>Pick from the popular list, or search for anything else.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <div>
+            <strong>Copy the command</strong>
+            <p>One button copies a single install command to your clipboard.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <div>
+            <strong>Paste it into Terminal</strong>
+            <p>Open Terminal (press <kbd>⌘</kbd>+<kbd>Space</kbd>, type "Terminal"), paste, and press Enter. Done.</p>
+          </div>
+        </li>
+      </ol>
+      <p class="how-foot">
+        Macnite uses <a href="https://brew.sh" target="_blank" rel="noopener">Homebrew</a>, the standard
+        package manager for Mac. If you don't have it yet, the downloadable
+        installer script sets it up for you.
+      </p>
+    </section>
+
+    <section>
+      <h2>Popular apps</h2>
+      <div id="popular-grid" class="grid" aria-busy="true">
+        <p class="loading">Loading apps…</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Search for more apps</h2>
+      <input
+        id="search"
+        class="search"
+        type="search"
+        placeholder="Search 14,000+ apps and tools…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <div id="search-results" class="results"></div>
+    </section>
+
+    <dialog id="next-steps" class="next-steps">
+      <h3 id="next-title">Now do this</h3>
+      <ol id="next-body"></ol>
+      <button type="button" id="next-close">Got it</button>
+    </dialog>
+
+    <section class="report">
+      <h2>Need help or seeing a problem?</h2>
+      <p class="report-help">Tell us what's going wrong — paste any error message you saw, or just describe what happened. We read every report.</p>
+      <form id="report-form" class="report-form" novalidate>
+        <textarea
+          id="report-message"
+          name="message"
+          rows="5"
+          required
+          placeholder="Paste the error message here…"
+        ></textarea>
+        <div class="report-row">
+          <button type="submit" id="report-submit">Send report</button>
+          <span id="report-status" class="report-status" role="status" aria-live="polite"></span>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="selection-bar" aria-live="polite">
+    <span id="count">0 selected</span>
+    <button type="button" id="clear" class="ghost" disabled>Clear</button>
+    <button type="button" id="copy" disabled>Copy command</button>
+    <button type="button" id="download" disabled>Download script</button>
+  </footer>
+
+  <!-- Netlify Forms: detected at build time. Hidden from users. -->
+  <form name="macnite-errors" netlify netlify-honeypot="bot-field" hidden>
+    <input name="message" />
+    <input name="stack" />
+    <input name="user_agent" />
+    <input name="url" />
+    <input name="bot-field" />
+  </form>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
