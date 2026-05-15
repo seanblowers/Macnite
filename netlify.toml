@@ -7,3 +7,25 @@
     Cache-Control = "public, max-age=3600"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Files whose contents change on every deploy — never let the browser or
+# CDN hold a stale copy, or users see old install commands for an hour.
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/app.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/banner.txt"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

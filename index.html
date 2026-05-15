@@ -121,6 +121,11 @@
     <input name="bot-field" />
   </form>
 
-  <script type="module" src="app.js"></script>
+  <script type="module" src="app.js?v=3"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+  </script>
 </body>
 </html>
