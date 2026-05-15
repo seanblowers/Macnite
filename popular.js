@@ -5,6 +5,7 @@ export const POPULAR = [
   { kind: 'cask', token: 'google-chrome' },
   { kind: 'cask', token: 'firefox' },
   { kind: 'cask', token: 'setapp' },
+  { kind: 'cask', token: 'adobe-creative-cloud' },
   { kind: 'cask', token: 'brave-browser' },
   { kind: 'cask', token: 'arc' },
 
