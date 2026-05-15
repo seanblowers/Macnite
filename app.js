@@ -259,6 +259,8 @@ const BREW_INSTALL_URL = 'https://raw.githubusercontent.com/Homebrew/install/HEA
 // especially on Apple Silicon (/opt/homebrew/bin). Eval shellenv so the install
 // step below can actually find `brew`.
 const BREW_SHELLENV_EVAL = 'eval "$(/opt/homebrew/bin/brew shellenv 2>/dev/null || /usr/local/bin/brew shellenv)"';
+const MACNITE_BANNER_URL = 'https://macnite.seanblowers.app/banner.txt';
+const MACNITE_BANNER_CMD = `curl -fsSL ${MACNITE_BANNER_URL} 2>/dev/null || true`;
 
 function buildCommand() {
   const { casks, formulae } = selectionByKind();
@@ -268,6 +270,7 @@ function buildCommand() {
   ];
   if (casks.length)    parts.push(`brew install --cask ${casks.join(' ')}`);
   if (formulae.length) parts.push(`brew install ${formulae.join(' ')}`);
+  parts.push(MACNITE_BANNER_CMD);
   return parts.join(' && ');
 }
 
@@ -291,7 +294,7 @@ function buildScript() {
   ];
   if (casks.length)    lines.push(`brew install --cask ${casks.join(' ')}`);
   if (formulae.length) lines.push(`brew install ${formulae.join(' ')}`);
-  lines.push('', 'echo "Done."', '');
+  lines.push('', MACNITE_BANNER_CMD, '');
   return lines.join('\n');
 }
 

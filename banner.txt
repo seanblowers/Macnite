@@ -1,0 +1,16 @@
+
+  ███╗   ███╗  █████╗   ██████╗ ███╗   ██╗ ██╗ ████████╗ ███████╗
+  ████╗ ████║ ██╔══██╗ ██╔════╝ ████╗  ██║ ██║ ╚══██╔══╝ ██╔════╝
+  ██╔████╔██║ ███████║ ██║      ██╔██╗ ██║ ██║    ██║    █████╗
+  ██║╚██╔╝██║ ██╔══██║ ██║      ██║╚██╗██║ ██║    ██║    ██╔══╝
+  ██║ ╚═╝ ██║ ██║  ██║ ╚██████╗ ██║ ╚████║ ██║    ██║    ███████╗
+  ╚═╝     ╚═╝ ╚═╝  ╚═╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═╝    ╚═╝    ╚══════╝
+
+  All done — your apps are installed.
+
+  If Macnite saved you some clicking, consider supporting the
+  projects that made it possible:
+
+    • Star Macnite on GitHub  →  https://github.com/seanblowers/Macnite
+    • Donate to Homebrew      →  https://github.com/Homebrew/brew#donations
+
