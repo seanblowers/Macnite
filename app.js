@@ -260,7 +260,9 @@ const BREW_INSTALL_URL = 'https://raw.githubusercontent.com/Homebrew/install/HEA
 // step below can actually find `brew`.
 const BREW_SHELLENV_EVAL = 'eval "$(/opt/homebrew/bin/brew shellenv 2>/dev/null || /usr/local/bin/brew shellenv)"';
 const MACNITE_BANNER_URL = 'https://macnite.seanblowers.app/banner.txt';
-const MACNITE_BANNER_CMD = `curl -fsSL ${MACNITE_BANNER_URL} 2>/dev/null || true`;
+// Brace-grouped so `|| true` only catches a curl failure, not the brew
+// install that runs before it in the one-liner chain.
+const MACNITE_BANNER_CMD = `{ curl -fsSL ${MACNITE_BANNER_URL} 2>/dev/null || true; }`;
 
 function buildCommand() {
   const { casks, formulae } = selectionByKind();
