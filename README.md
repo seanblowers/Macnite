@@ -1,5 +1,7 @@
 # Macnite
 
+**Live site:** [macnite.seanblowers.app](https://macnite.seanblowers.app)
+
 A Ninite-style installer for macOS, powered by [Homebrew](https://brew.sh).
 Tick the apps and CLI tools you want, then copy a `brew` one-liner or download a
 shell script that installs Homebrew (if missing) and your selections in one go.

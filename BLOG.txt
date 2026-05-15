@@ -1,5 +1,7 @@
 Macnite: a Ninite for Mac, built in a static HTML file
 
+Live at macnite.seanblowers.app. Source at github.com/seanblowers/Macnite.
+
 
 If you've ever set up a Windows machine, you've probably used Ninite. You tick the apps you want, you get one installer, you double-click it, and a few minutes later your machine is loaded up with Chrome, VLC, 7-Zip, and so on. No wizards. No "decline" buttons for browser toolbars. No signups. It's lovely.
 
@@ -60,3 +62,5 @@ What's next
 Probably: icons that aren't favicons (the favicon service we use is fine but inconsistent across vendors), a way to share a Macnite link to a specific selection, and a "did this work?" callback so I can see which apps actually install cleanly on first try.
 
 The whole thing is about five hundred lines of JavaScript. The hardest parts were the things that looked simple: one shell line that works on every Mac, four sentences of instructions that don't mislead a non-technical user. Software is funny like that.
+
+Try it at macnite.seanblowers.app. The code is on GitHub at github.com/seanblowers/Macnite — issues and pull requests welcome.
